@@ -61,12 +61,13 @@ namespace ReportEngine
                 new TemplateStackView("LOH stats", new LOHView(viewModel)),
                 new TemplateStackView("Finalizer Object Stats", new FinalizerView(viewModel)),
                 new TemplateStackView("Top 50 Types consumig memory", new HeapStatsView(viewModel)),
-                new TemplateStackView("GCRoots of top 3 CLR types", new TopGCRootView(viewModel)),
                 new SplitterView()
             };
             var screen = new ScreenView(_consoleRenderer, _invocationContext.Console) { Child = stackLayoutView2 };
             screen.Render(region);
         }
+
+
 
     }
 }
