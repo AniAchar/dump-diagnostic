@@ -11,8 +11,7 @@ namespace ReportEngine.ReportTemplates.ConsoleTemplates
     {
         public HeapStatsView(MemoryReportView reportView)
         {
-            var count = reportView.HeapStats.Count() < 50 ? reportView.HeapStats.Count() : 50;
-            Items = reportView.HeapStats.Take(count).ToList();
+            Items = reportView.HeapStats.Take(50).ToList();
             AddColumn(h => h.type, "Type");
             AddColumn(h => h.count, "Count");
             AddColumn(h => h.size, "Size");

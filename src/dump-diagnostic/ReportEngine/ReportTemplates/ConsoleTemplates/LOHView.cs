@@ -11,7 +11,7 @@ namespace ReportEngine.ReportTemplates.ConsoleTemplates
     {
         public LOHView(MemoryReportView reportView)
         {
-            Items = reportView.LOH.ToList();
+            Items = reportView.LOH.Take(50).ToList();
             AddColumn(h => h.type, "Type");
             AddColumn(h => h.count, "Count");
             AddColumn(h => h.size, "Size");

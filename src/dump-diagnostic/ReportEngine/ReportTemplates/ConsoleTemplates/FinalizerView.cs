@@ -11,8 +11,7 @@ namespace ReportEngine.ReportTemplates.ConsoleTemplates
     {
         public FinalizerView(MemoryReportView reportView)
         {
-            var count = reportView.HeapStats.Count() < 50 ? reportView.HeapStats.Count() : 50;
-            Items = reportView.FinilazerStats.Take(count).ToList();
+            Items = reportView.FinilazerStats.Take(50).ToList();
             AddColumn(h => h.type, "Type");
             AddColumn(h => h.count, "Count");
             AddColumn(h => h.size, "Size");
