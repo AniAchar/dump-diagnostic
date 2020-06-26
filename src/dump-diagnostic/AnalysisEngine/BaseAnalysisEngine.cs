@@ -123,11 +123,12 @@ namespace AnalysisEngine
             //   ? m.Name.EndsWith(".exe") : File.Exists(Path.ChangeExtension(m.Name, null)));
             ClrModule mainModule = null;
 
-            foreach (var module in Runtime.AppDomains.SelectMany(ad => ad.Modules))
+
+            if (Runtime.ClrInfo.Flavor.ToString("G").ToLower() == "desktop")
             {
-                if(RuntimeInformation.IsOSPlatform(OSPlatform.Windows))
+                foreach (var module in Runtime.AppDomains.SelectMany(ad => ad.Modules))
                 {
-                    if(module.Name != null)
+                    if (module.Name != null)
                     {
                         if (module.Name.EndsWith(".exe"))
                         {
@@ -135,52 +136,50 @@ namespace AnalysisEngine
                         }
                     }
                 }
-                else
-                {
-                    if(module.Name != null)
-                    {
-                        if (File.Exists(Path.ChangeExtension(module.Name, null)))
-                        {
-                            mainModule = module;
-                        }
-                    }
-                }
             }
-
-            return mainModule.Name;
-        }
-
-        protected ClrThread GetMainThread()
-        {
-            return Runtime.Threads.Single(t => !t.IsBackground);
-        }
-
-        /// <summary>
-        /// Get the if the dump is using server GC or Workstation GC
-        /// </summary>
-        /// <returns></returns>
-        protected string GetGCMode()
-        {
-            return Runtime.Heap.IsServer ? "Server" : "Workstation";
-        }
-
-        /// <summary>
-        /// Gets if the dump is dotnet core of dotnet framework
-        /// </summary>
-        /// <returns>string either "Desktop" for framework or "Core" for dotnet core</returns>
-        protected string GetDotnetFlavor()
-        {
-            if(Runtime.ClrInfo.Flavor.ToString("G") == "Desktop")
+            else
             {
-                return "Framework";
+                var t = GetMainThread();
+                var mainFunction = t.EnumerateStackTrace().Where(f => f.Method?.Name == "Main").FirstOrDefault();
+                mainModule = mainFunction.Method.Type.Module;
             }
-            return Runtime.ClrInfo.Flavor.ToString("G");
+
+
+                
+            return mainModule.Name;
+            }
+
+            protected ClrThread GetMainThread()
+            {
+                return Runtime.Threads.Single(t => !t.IsBackground);
+            }
+
+            /// <summary>
+            /// Get the if the dump is using server GC or Workstation GC
+            /// </summary>
+            /// <returns></returns>
+            protected string GetGCMode()
+            {
+                return Runtime.Heap.IsServer ? "Server" : "Workstation";
+            }
+
+            /// <summary>
+            /// Gets if the dump is dotnet core of dotnet framework
+            /// </summary>
+            /// <returns>string either "Desktop" for framework or "Core" for dotnet core</returns>
+            protected string GetDotnetFlavor()
+            {
+                if (Runtime.ClrInfo.Flavor.ToString("G") == "Desktop")
+                {
+                    return "Framework";
+                }
+                return Runtime.ClrInfo.Flavor.ToString("G");
+            }
+
+            protected string GetClrVersion()
+            {
+                return Runtime.ClrInfo.Version.ToString();
+            }
         }
 
-        protected string GetClrVersion()
-        {
-            return Runtime.ClrInfo.Version.ToString();
-        }
-        }
-
-}
+    }
