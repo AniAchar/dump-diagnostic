@@ -51,7 +51,11 @@ namespace AnalysisEngine.Engines
             viewModel = new CrashReportView
             {
                 ThreadDetails = GetThreadDetails(),
-
+                GCMode = GetGCMode(),
+                ClrVersion = GetClrVersion(),
+                DotnetFlavor = GetDotnetFlavor(),
+                MainModuleName = GetMainModule(),
+                ThreadsWithExceptions = GetThreadsWithException()
             };
         }
 
