@@ -59,6 +59,27 @@ namespace DumpDiagnostic
                         }
                         break;
                     }
+                case "crash":
+                    {
+                        try
+                        {
+                            analysisEngine = new CrashAnalysis(dumpPath.FullName, verbose);
+
+                            RunAnalysis(analysisEngine);
+                            GenerateReport(analysisEngine);
+                        }
+                        catch (Exception e) when (e is FileNotFoundException || e is ArchitectureNotMatchException)
+                        {
+                            initFailed = true;
+                            Console.WriteLine(e.Message);
+                        }
+                        catch (ClrDiagnosticsException e)
+                        {
+                            initFailed = true;
+                            Console.WriteLine($"Failed to create the runtime. Use the --verbose switch to get more information\n {e.Message}");
+                        }
+                        break;
+                    }
                 default:
                     {
                         break;
