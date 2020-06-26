@@ -46,12 +46,16 @@ namespace ReportEngine.Helpers
             ClrException currentEx = _thread.CurrentException;
             if (currentEx is ClrException ex)
                 CurrentException = $"Exception: {ex.Type.Name}, HResult= {ex.HResult}";
+            else
+                CurrentException = "";
         }
 
         public void SetFinalizer()
         {
             if (_thread.IsFinalizer)
                 Finalizer = "Finalizer thread";
+            else
+                Finalizer = "";
         }
 
         public void SetGCMode()
