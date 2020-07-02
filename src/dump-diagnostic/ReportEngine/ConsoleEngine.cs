@@ -2,6 +2,7 @@
 using ReportEngine.ReportView;
 using System;
 using System.Collections.Generic;
+using System.CommandLine;
 using System.CommandLine.Invocation;
 using System.CommandLine.Rendering;
 using System.CommandLine.Rendering.Views;
@@ -14,13 +15,12 @@ namespace ReportEngine
     {
         private readonly string _reportType;
         private ConsoleRenderer _consoleRenderer;
-        private InvocationContext _invocationContext;
-        public ConsoleEngine(string reportType, InvocationContext invocationContext)
+        private IConsole _invocationContext;
+        public ConsoleEngine(string reportType, IConsole invocationContext)
         {
             _reportType = reportType;
             _invocationContext = invocationContext;
-            _consoleRenderer = new ConsoleRenderer(invocationContext.Console, mode: invocationContext.BindingContext.OutputMode(),
-        resetAfterRender: true);
+            _consoleRenderer = new ConsoleRenderer(invocationContext,resetAfterRender: true);
         }
         public void GenerateReport(BaseReportView viewModel, string templatePath)
         {
@@ -46,7 +46,7 @@ namespace ReportEngine
 
             
 
-            var console = _invocationContext.Console;
+            var console = _invocationContext;
 
             if (console is ITerminal terminal)
             {
@@ -68,7 +68,7 @@ namespace ReportEngine
                 new TemplateStackView("Top 50 Types consumig memory", new HeapStatsView(viewModel)),
                 new SplitterView()
             };
-            var screen = new ScreenView(_consoleRenderer, _invocationContext.Console) { Child = stackLayoutView2 };
+            var screen = new ScreenView(_consoleRenderer, _invocationContext) { Child = stackLayoutView2 };
             screen.Render(region);
         }
 
@@ -82,7 +82,7 @@ namespace ReportEngine
 
 
 
-            var console = _invocationContext.Console;
+            var console = _invocationContext;
 
             if (console is ITerminal terminal)
             {
@@ -98,7 +98,7 @@ namespace ReportEngine
                 new TemplateStackView("Threads with exceptions", new StackFramesStackView(viewModel)),
                 new SplitterView()
             };
-            var screen = new ScreenView(_consoleRenderer, _invocationContext.Console) { Child = stackLayoutView2 };
+            var screen = new ScreenView(_consoleRenderer, _invocationContext) { Child = stackLayoutView2 };
             screen.Render(region);
         }
 

@@ -5,40 +5,35 @@ using System.IO;
 using AnalysisEngine;
 using Microsoft.Diagnostics.Runtime;
 using System.CommandLine.Invocation;
+using System.CommandLine;
 
 namespace DumpDiagnostic
 {
     class Program
     {
-        static void Main(InvocationContext invocationContext, FileInfo dumpPath, string diagnose, string reportType, bool verbose)
+        static void Main(InvocationContext invocationContext, FileInfo dumpPath, DiagnosisType diagnose, ReportTypes reportType, bool verbose)
         {
             bool initFailed = false;
 
             IReportEngine reportEngine;
             IAnalysisEngine analysisEngine;
 
-            switch (reportType.ToLower().Trim())
+            switch (reportType)
             {
-                case "html":
+                case ReportTypes.console:
                     {
-                        reportEngine = new HtmlEngine();
-                        break;
-                    }
-                case "console":
-                    {
-                        reportEngine = new ConsoleEngine(diagnose.ToLower().Trim(), invocationContext);
+                        reportEngine = new ConsoleEngine(diagnose.ToString("G"), invocationContext.Console);
                         break;
                     }
                 default:
                     reportEngine = null;
-                    Usage();
                     break;
 
             }
 
-            switch (diagnose.ToLower().Trim())
+            switch (diagnose)
             {
-                case "memory":
+                case DiagnosisType.memory:
                     {
                         try
                         {
@@ -59,7 +54,7 @@ namespace DumpDiagnostic
                         }
                         break;
                     }
-                case "crash":
+                case DiagnosisType.crash:
                     {
                         try
                         {
@@ -115,9 +110,41 @@ namespace DumpDiagnostic
 
         }
 
-        private static void Usage()
+        public enum ReportTypes
         {
-            Console.WriteLine("To use the dump-diagnostic tool, you must pass the dump file path using the --dump-path switch and the dianostics that needs to be done using the --diagnose and the report type using the --report-type.\n --diagnose can be either `memory` or `crash`\n--report-type can be either `html` or `console`.");
+            //TODO: Implement the HTML rendering options.
+            console,       
         }
+        public enum DiagnosisType
+        {
+            memory,
+            crash
+        }
+
+        private static Command CrashDiagCommand() => new Command("crash", description: "Analyze dotnet crash of the dump");
+
+        private static Option VerboseOption => new Option(
+
+            aliases: new[] { "-v", "--verbose" },
+            description: "Set to get the verbose logs")
+        {
+            Argument = new Argument<bool>(name:"verbose")
+        };
+
+        private static Option DumpPathOption => new Option(
+            aliases: new[] { "-d", "--dump-path" },
+            description: "Absolute path to the dump file")
+        {
+            Argument = new Argument<FileInfo>(name: "dump-path")
+        };
+
+        private static Option ReportTypeOption => new Option(
+            aliases: new[] { "--report-type" },
+            description: "Absolute path to the dump file")
+        {
+            Argument = new Argument<ReportTypes>(name: "report-type")
+        };
+
+
     }
 }
