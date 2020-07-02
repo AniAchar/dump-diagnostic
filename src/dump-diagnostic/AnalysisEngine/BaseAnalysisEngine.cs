@@ -144,7 +144,10 @@ namespace AnalysisEngine
                 mainModule = mainFunction.Method.Type.Module;
             }
 
-
+            if(mainModule == null)
+            {
+                return "";
+            }
                 
             return mainModule.Name;
             }
