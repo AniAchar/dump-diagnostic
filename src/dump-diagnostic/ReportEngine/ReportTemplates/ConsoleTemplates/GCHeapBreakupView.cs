@@ -14,8 +14,8 @@ namespace ReportEngine.ReportTemplates.ConsoleTemplates
         {
             Items = reportView.GCHeapBrekup.ToList();
             AddColumn(h => h.GCtype, "GC Type");
-            AddColumn(h => h.commitedMemory, "Commited memory");
-            AddColumn(h => h.reservedMemory, "Reserved Memory");
+            AddColumn(h => h.commitedMemory.Length, "Commited memory in bytes");
+            AddColumn(h => h.reservedMemory.Length, "Reserved Memory in bytes");
         }
     }
 }

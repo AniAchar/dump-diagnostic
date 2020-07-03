@@ -11,7 +11,7 @@ namespace ReportEngine.ReportTemplates.ConsoleTemplates
         public SplitterView()
         {
 
-            Span = new ContentSpan("==========================================");
+            Span = new ContentSpan("\n\n==========================================\n\n");
         }
     }
 }
