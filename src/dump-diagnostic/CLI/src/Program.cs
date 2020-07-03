@@ -13,6 +13,7 @@ namespace DumpDiagnostic
     {
         static void Main(InvocationContext invocationContext, FileInfo dumpPath, DiagnosisType diagnose, ReportTypes reportType, bool verbose)
         {
+            CheckArguments(dumpPath, diagnose, reportType);
             bool initFailed = false;
 
             IReportEngine reportEngine;
@@ -103,10 +104,6 @@ namespace DumpDiagnostic
                     Console.WriteLine("Initialization failed. Cannot run analysis");
                 }
             }
-            if (!Console.IsOutputRedirected)
-            {
-                Console.ReadKey();
-            }
 
         }
 
@@ -121,29 +118,14 @@ namespace DumpDiagnostic
             crash
         }
 
-        private static Command CrashDiagCommand() => new Command("crash", description: "Analyze dotnet crash of the dump");
-
-        private static Option VerboseOption => new Option(
-
-            aliases: new[] { "-v", "--verbose" },
-            description: "Set to get the verbose logs")
+        private static void CheckArguments(FileInfo dumpPath, DiagnosisType diagnose, ReportTypes reportType)
         {
-            Argument = new Argument<bool>(name:"verbose")
-        };
-
-        private static Option DumpPathOption => new Option(
-            aliases: new[] { "-d", "--dump-path" },
-            description: "Absolute path to the dump file")
-        {
-            Argument = new Argument<FileInfo>(name: "dump-path")
-        };
-
-        private static Option ReportTypeOption => new Option(
-            aliases: new[] { "--report-type" },
-            description: "Absolute path to the dump file")
-        {
-            Argument = new Argument<ReportTypes>(name: "report-type")
-        };
+            if(dumpPath== null || diagnose == null || reportType == null)
+            {
+                Console.WriteLine("Missing argument(s). Please use dump-diagnostic -h to look at all the required arguments");
+                Environment.Exit(-1);
+            }
+        }
 
 
     }
