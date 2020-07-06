@@ -1,9 +1,11 @@
-﻿using ReportEngine.ReportTemplates.ConsoleTemplates;
+﻿using ReportEngine.ReportRenderer;
+using ReportEngine.ReportTemplates.ConsoleTemplates;
 using ReportEngine.ReportView;
 using System;
 using System.Collections.Generic;
 using System.CommandLine;
 using System.CommandLine.Invocation;
+using System.CommandLine.IO;
 using System.CommandLine.Rendering;
 using System.CommandLine.Rendering.Views;
 using System.Linq;
@@ -13,25 +15,19 @@ namespace ReportEngine
 {
     public class ConsoleEngine : IReportEngine
     {
-        private readonly string _reportType;
         private ConsoleRenderer _consoleRenderer;
         private IConsole _invocationContext;
-        public ConsoleEngine(string reportType, IConsole invocationContext)
+        private IReportRender _reportRender;
+        public ConsoleEngine(IReportRender reportRender)
         {
-            _reportType = reportType;
-            _invocationContext = invocationContext;
-            _consoleRenderer = new ConsoleRenderer(invocationContext,resetAfterRender: true);
+            _invocationContext = new SystemConsole();
+            _consoleRenderer = new ConsoleRenderer(_invocationContext, resetAfterRender: true);
+            _reportRender = reportRender;
+            _reportRender.Init(_invocationContext, _consoleRenderer);
         }
         public void GenerateReport(BaseReportView viewModel, string templatePath)
         {
-            if(_reportType.ToLower() == "memory")
-            {
-                RenderMemoryReport((MemoryReportView)viewModel);
-            }
-            if(_reportType.ToLower() == "crash")
-            {
-                RenderCrashReport((CrashReportView)viewModel);
-            }
+            _reportRender.RenderReport(viewModel);
 
         }
 
@@ -56,11 +52,13 @@ namespace ReportEngine
             console.Append(new ContentView("Dump details"));
             console.Append(new SplitterView());
             console.Append(new DumpDetailsView(viewModel));
+            console.Append(new ContentView("\n\n"));
             StackLayoutView stackLayoutView2 = new StackLayoutView
             {
                 new SplitterView(),
                 new ContentView($"Total GC Heap Size: {viewModel.TotalGCMemory}"),
                 new SplitterView(),
+                new ContentView("\n\n"),
                 new TemplateStackView("GC split per logical heap", new HeapBalanceView(viewModel)),
                 new TemplateStackView("Memory stats per GC type", new GCHeapBreakupView(viewModel)),
                 new TemplateStackView("LOH stats", new LOHView(viewModel)),
