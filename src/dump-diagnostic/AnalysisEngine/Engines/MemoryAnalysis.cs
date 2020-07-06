@@ -66,7 +66,8 @@ namespace AnalysisEngine.Engines
                 LOH = GetLOHStats(),
                 MainModuleName = GetMainModule(),
                 TopGCRoots = GetTopGCRoot(),
-                TotalGCMemory = GetGCHeapSize()
+                TotalGCMemory = GetGCHeapSize(),
+                DumpPath = DumpPath
             };
         }
 

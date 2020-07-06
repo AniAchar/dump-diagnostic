@@ -55,7 +55,8 @@ namespace AnalysisEngine.Engines
                 ClrVersion = GetClrVersion(),
                 DotnetFlavor = GetDotnetFlavor(),
                 MainModuleName = GetMainModule(),
-                ThreadsWithExceptions = GetThreadsWithException()
+                ThreadsWithExceptions = GetThreadsWithException(),
+                DumpPath = DumpPath
             };
         }
 

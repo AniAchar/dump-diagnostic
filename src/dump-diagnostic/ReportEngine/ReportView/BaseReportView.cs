@@ -12,5 +12,7 @@ namespace ReportEngine.ReportView
 
         public string GCMode { get; set; }
 
+        public string DumpPath { get; set; }
+
     }
 }
