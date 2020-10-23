@@ -4,20 +4,20 @@ A CLI tool to run prebuilt analysis rules on dotnet core dumps on both Linux and
 
 ## Usage
 
-`dump-diagnostic --dump-path <full path to the dump file> --diagnose <analysis> --report-type <report-type> --verbose`
+`dump-diagnostic <diagnostic type> --dump-path <full path to the dump file> --report <report-type> --verbose`
 
 ### Valid diagnostic rules
 
 ```
 
-- crash
-- memory
+	crash
+    memory
 
 ```
 ### Valid report type
 
 ```
 
--console
+	console
 
 ```
