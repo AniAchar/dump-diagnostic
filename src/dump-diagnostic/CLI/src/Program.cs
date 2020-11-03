@@ -24,6 +24,7 @@ namespace DumpDiagnostic
             var parser = new CommandLineBuilder()
                 .AddCommand(MemoryDiagCommand())
                 .AddCommand(CrashDiagCommand())
+                .AddCommand(SqlClientAnalysisCommand())
                 .UseAnsiTerminalWhenAvailable()
                 .UseDefaults()
                 .Build();
@@ -132,6 +133,41 @@ namespace DumpDiagnostic
                     analysisEngine.RunAnalysis();
                     var reportRenderer = new CrashReportRenderer();
                     analysisEngine.GenerateReport(new ConsoleEngine(reportRenderer));
+                }
+                catch (Exception e) when (e is FileNotFoundException || e is ArchitectureNotMatchException)
+                {
+                    Console.WriteLine(e.Message);
+                }
+                catch (ClrDiagnosticsException e)
+                {
+                    Console.WriteLine($"Failed to create the runtime. Use the --verbose switch to get more information\n {e.Message}");
+                }
+            }
+                    );
+            return cmd;
+        }
+
+        private static Command SqlClientAnalysisCommand()
+        {
+            var cmd = new Command(
+                   name: "sqlclient",
+                   description: "Runs a crash analysis on the dumps and shows dotnet exception callstack.")
+            {
+                // Arguments and Options
+                DumpPathOption(),
+                VerboseOptions(),
+                ReportOptions()
+            };
+            cmd.Handler = CommandHandler.Create((FileInfo dumpPath, ReportTypes reportTypes, bool verbose) =>
+            {
+                try
+                {
+                    IAnalysisEngine analysisEngine;
+                    analysisEngine = new SQLClientAnalysis(dumpPath.FullName, verbose);
+
+                    analysisEngine.RunAnalysis();
+                    //var reportRenderer = new CrashReportRenderer();
+                    //analysisEngine.GenerateReport(new ConsoleEngine(reportRenderer));
                 }
                 catch (Exception e) when (e is FileNotFoundException || e is ArchitectureNotMatchException)
                 {
