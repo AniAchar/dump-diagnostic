@@ -13,8 +13,6 @@ namespace AnalysisEngine.Engines
 {
     public sealed class MemoryAnalysis : BaseAnalysisEngine, IAnalysisEngine
     {
-        private string DumpPath { get; set; }
-
         public MemoryReportView viewModel;
 
         /// <summary>
@@ -23,30 +21,11 @@ namespace AnalysisEngine.Engines
         /// <param name="dumpPath">Ful path to the dump file</param>
         /// <param name="reportEngine">The rendering engine that we will be using to create the reports</param>
         /// <param name="verbose">This is for debugging the app.</param>
-        public MemoryAnalysis(string dumpPath, bool verbose = false):
-            base(verbose)
-        {
-            this.DumpPath = dumpPath;
-            try
-            {
-                CreateDataTarget(dumpPath);
-                MatchArchitecture();
-            }
-            catch(Exception e) when(e is ArchitectureNotMatchException || e is FileNotFoundException)
-            {
-                throw e;
-            }
-            
-            try
-            {
-                CreateRuntime();
-            }
-            catch(ClrDiagnosticsException e)
-            {
-                throw e;
-            }
-
-        }
+        public MemoryAnalysis(
+            string dumpPath,
+            bool verbose = false) :
+            base(dumpPath, verbose)
+        { }
 
         public void GenerateReport(IReportEngine reportEngine)
         {
