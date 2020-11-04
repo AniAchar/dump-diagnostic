@@ -174,7 +174,7 @@ namespace AnalysisEngine
 
         protected ClrThread GetMainThread()
         {
-            return Runtime.Threads.Single(t => !t.IsBackground);
+            return Runtime.Threads.FirstOrDefault(t => !t.IsBackground);
         }
 
         /// <summary>
