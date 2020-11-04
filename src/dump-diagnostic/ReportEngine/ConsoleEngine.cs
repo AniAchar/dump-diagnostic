@@ -63,7 +63,7 @@ namespace ReportEngine
                 new TemplateStackView("Memory stats per GC type", new GCHeapBreakupView(viewModel)),
                 new TemplateStackView("LOH stats", new LOHView(viewModel)),
                 new TemplateStackView("Finalizer Object Stats", new FinalizerView(viewModel)),
-                new TemplateStackView("Top 50 Types consumig memory", new HeapStatsView(viewModel)),
+                new TemplateStackView("Top 50 Types consuming  memory", new HeapStatsView(viewModel)),
                 new SplitterView()
             };
             var screen = new ScreenView(_consoleRenderer, _invocationContext) { Child = stackLayoutView2 };
