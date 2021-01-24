@@ -359,3 +359,4 @@ MigrationBackup/
 
 launchSettings.json
 /src/dump-diagnostic/CLI/nuget.config
+/src/.vscode
