@@ -11,6 +11,7 @@ namespace AnalysisEngine
 {
     public class BaseAnalysisEngine : IDisposable
     {
+        public string DumpPath { get; set; }
         private bool disposedValue;
         private readonly bool verbose;
         protected DataTarget Target { get; private set; }
@@ -36,8 +37,27 @@ namespace AnalysisEngine
             }
             Target = DataTarget.LoadDump(dumpPath);
         }
-        public BaseAnalysisEngine(bool verbose)
+        public BaseAnalysisEngine(string dumpPath, bool verbose)
         {
+            this.DumpPath = dumpPath;
+            try
+            {
+                CreateDataTarget(dumpPath);
+                MatchArchitecture();
+            }
+            catch (Exception e) when (e is ArchitectureNotMatchException || e is FileNotFoundException)
+            {
+                throw e;
+            }
+
+            try
+            {
+                CreateRuntime();
+            }
+            catch (ClrDiagnosticsException e)
+            {
+                throw e;
+            }
             this.verbose = verbose;
         }
         protected void CreateRuntime()
@@ -144,45 +164,67 @@ namespace AnalysisEngine
                 mainModule = mainFunction.Method.Type.Module;
             }
 
-            if(mainModule == null)
+            if (mainModule == null)
             {
                 return "";
             }
-                
+
             return mainModule.Name;
-            }
-
-            protected ClrThread GetMainThread()
-            {
-                return Runtime.Threads.Single(t => !t.IsBackground);
-            }
-
-            /// <summary>
-            /// Get the if the dump is using server GC or Workstation GC
-            /// </summary>
-            /// <returns></returns>
-            protected string GetGCMode()
-            {
-                return Runtime.Heap.IsServer ? "Server" : "Workstation";
-            }
-
-            /// <summary>
-            /// Gets if the dump is dotnet core of dotnet framework
-            /// </summary>
-            /// <returns>string either "Desktop" for framework or "Core" for dotnet core</returns>
-            protected string GetDotnetFlavor()
-            {
-                if (Runtime.ClrInfo.Flavor.ToString("G") == "Desktop")
-                {
-                    return "Framework";
-                }
-                return Runtime.ClrInfo.Flavor.ToString("G");
-            }
-
-            protected string GetClrVersion()
-            {
-                return Runtime.ClrInfo.Version.ToString();
-            }
         }
 
+        protected ClrThread GetMainThread()
+        {
+            return Runtime.Threads.FirstOrDefault(t => !t.IsBackground);
+        }
+
+        /// <summary>
+        /// Get the if the dump is using server GC or Workstation GC
+        /// </summary>
+        /// <returns></returns>
+        protected string GetGCMode()
+        {
+            return Runtime.Heap.IsServer ? "Server" : "Workstation";
+        }
+
+        /// <summary>
+        /// Gets if the dump is dotnet core of dotnet framework
+        /// </summary>
+        /// <returns>string either "Desktop" for framework or "Core" for dotnet core</returns>
+        protected string GetDotnetFlavor()
+        {
+            if (Runtime.ClrInfo.Flavor.ToString("G") == "Desktop")
+            {
+                return "Framework";
+            }
+            return Runtime.ClrInfo.Flavor.ToString("G");
+        }
+
+        protected string GetClrVersion()
+        {
+            return Runtime.ClrInfo.Version.ToString();
+        }
+
+        protected IEnumerable<ClrObject> FilterObjectByType(string typeName)
+        {
+            return Runtime.Heap.EnumerateObjects().Where(o => o.Type.Name == typeName).AsEnumerable();
+        }
+
+        protected unsafe T ReadUnamangedStructElement<T>(ClrObject obj, int index) where T : unmanaged
+        {
+            if (obj.Type.ComponentSize != sizeof(T))
+                throw new InvalidOperationException($"Type {obj.Type.ElementType} is 0x{obj.Type.ComponentSize:x} but {typeof(T).FullName} is size 0x{sizeof(T):x}");
+
+            ulong address = obj.Type.GetArrayElementAddress(obj.Address, index);
+            Span<byte> buffer = new byte[sizeof(T)];
+            int read = Target.DataReader.Read(address, buffer);
+            if (read != buffer.Length)
+                throw new IOException($"Could not read 0x{buffer.Length:x} bytes from address 0x{address:x}.");
+
+            // Convert the buffer into the struct.  You can also use pinning GC handles with Marshal.PtrToStructure to avoid
+            // using unsafe code if needed.
+            fixed (byte* ptr = buffer)
+                return *(T*)ptr;
+        }
     }
+
+}

@@ -13,33 +13,11 @@ namespace AnalysisEngine.Engines
 {
     public sealed class CrashAnalysis : BaseAnalysisEngine, IAnalysisEngine
     {
-        private string DumpPath { get; set; }
-
         CrashReportView viewModel;
 
         public CrashAnalysis(string dumpPath, bool verbose = false) :
-            base(verbose)
+            base(dumpPath, verbose)
         {
-            this.DumpPath = dumpPath;
-            try
-            {
-                CreateDataTarget(dumpPath);
-                MatchArchitecture();
-            }
-            catch (Exception e) when (e is ArchitectureNotMatchException || e is FileNotFoundException)
-            {
-                throw e;
-            }
-
-            try
-            {
-                CreateRuntime();
-            }
-            catch (ClrDiagnosticsException e)
-            {
-                throw e;
-            }
-
         }
         public void GenerateReport(IReportEngine reportEngine)
         {
